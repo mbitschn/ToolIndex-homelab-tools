@@ -38,7 +38,7 @@ function generateReadme(tools, siteUrl) {
     const date = new Date().toISOString().split("T")[0];
 
     let md = `<div align="center">\n`;
-    md += `<img src="${siteUrl}/email-logo.svg" width="72" height="72" alt="ToolIndex" />\n\n`;
+    md += `<img src="${siteUrl}/api/logo" width="72" height="72" alt="ToolIndex" />\n\n`;
     md += `# ToolIndex — Homelab Tools\n\n`;
     md += `**${count} curated homelab tools**, automatically synced nightly from [ToolIndex](${siteUrl}).\n\n`;
     md += `[![Submit a Tool](https://img.shields.io/badge/Submit%20a%20Tool-%236366f1?style=for-the-badge&logo=github)](${siteUrl}/community)`;
