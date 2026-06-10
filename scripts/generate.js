@@ -36,6 +36,7 @@ function generateReadme(tools, siteUrl) {
     const categories = Object.keys(byCategory).sort();
     const count = tools.length;
     const date = new Date().toISOString().split("T")[0];
+    const badgeDate = date.replace(/-/g, "--");
 
     let md = `<div align="center">\n`;
     md += `<img src="${siteUrl}/api/logo" width="72" height="72" alt="ToolIndex" />\n\n`;
@@ -43,7 +44,7 @@ function generateReadme(tools, siteUrl) {
     md += `**${count} curated homelab tools**, automatically synced nightly from [ToolIndex](${siteUrl}).\n\n`;
     md += `[![Submit a Tool](https://img.shields.io/badge/Submit%20a%20Tool-%236366f1?style=for-the-badge&logo=github)](${siteUrl}/community)`;
     md += ` [![Visit ToolIndex](https://img.shields.io/badge/Visit%20ToolIndex-black?style=for-the-badge)](${siteUrl})\n\n`;
-    md += `![Last Synced](https://img.shields.io/badge/last%20synced-${date}-brightgreen?style=flat-square)\n`;
+    md += `![Last Synced](https://img.shields.io/badge/last%20synced-${badgeDate}-brightgreen?style=flat-square)\n`;
     md += `</div>\n\n---\n\n`;
 
     md += `## Categories\n\n`;
