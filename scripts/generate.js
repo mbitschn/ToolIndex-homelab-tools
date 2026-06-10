@@ -1,9 +1,11 @@
 const https = require("https");
+const http = require("http");
 const fs = require("fs");
 
 function fetchJSON(url) {
+    const lib = url.startsWith("https") ? https : http;
     return new Promise((resolve, reject) => {
-        https.get(url, (res) => {
+        lib.get(url, (res) => {
             let data = "";
             res.on("data", (chunk) => (data += chunk));
             res.on("end", () => {
@@ -25,7 +27,7 @@ function slugify(text) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function generateReadme(tools, siteUrl) {
+function generateReadme(tools, siteUrl, config) {
     const byCategory = {};
     for (const tool of tools) {
         const cat = tool.category || "Uncategorized";
@@ -38,12 +40,19 @@ function generateReadme(tools, siteUrl) {
     const date = new Date().toISOString().split("T")[0];
     const badgeDate = date.replace(/-/g, "--");
 
+    const submitUrl = config.tools_submit_url
+        ? (config.tools_submit_url.startsWith("http") ? config.tools_submit_url : `${siteUrl}${config.tools_submit_url}`)
+        : null;
+
     let md = `<div align="center">\n`;
     md += `<img src="${siteUrl}/api/logo" width="72" height="72" alt="ToolIndex" />\n\n`;
     md += `# ToolIndex — Homelab Tools\n\n`;
     md += `**${count} curated homelab tools**, automatically synced nightly from [ToolIndex](${siteUrl}).\n\n`;
-    md += `[![Submit a Tool](https://img.shields.io/badge/Submit%20a%20Tool-%236366f1?style=for-the-badge&logo=github)](${siteUrl}/community)`;
-    md += ` [![Visit ToolIndex](https://img.shields.io/badge/Visit%20ToolIndex-black?style=for-the-badge)](${siteUrl})\n\n`;
+    if (submitUrl) {
+        md += `[![Submit a Tool](https://img.shields.io/badge/Submit%20a%20Tool-%236366f1?style=for-the-badge)](${submitUrl})`;
+        md += ` `;
+    }
+    md += `[![Visit ToolIndex](https://img.shields.io/badge/Visit%20ToolIndex-black?style=for-the-badge)](${siteUrl})\n\n`;
     md += `![Last Synced](https://img.shields.io/badge/last%20synced-${badgeDate}-brightgreen?style=flat-square)\n`;
     md += `</div>\n\n---\n\n`;
 
@@ -77,12 +86,15 @@ async function main() {
     const siteUrl = (process.env.TOOLINDEX_API_URL || "").replace(/\/+$/, "");
     if (!siteUrl) throw new Error("TOOLINDEX_API_URL environment variable is required");
 
+    console.log(`Fetching config from ${siteUrl}/api/export/github-config ...`);
+    const config = await fetchJSON(`${siteUrl}/api/export/github-config`);
+
     console.log(`Fetching from ${siteUrl}/api/export/tools ...`);
     const tools = await fetchJSON(`${siteUrl}/api/export/tools`);
     console.log(`Got ${tools.length} tools`);
 
     fs.writeFileSync("tools.json", JSON.stringify(tools, null, 2) + "\n");
-    fs.writeFileSync("README.md", generateReadme(tools, siteUrl));
+    fs.writeFileSync("README.md", generateReadme(tools, siteUrl, config));
 
     console.log("Generated README.md and tools.json");
 }
